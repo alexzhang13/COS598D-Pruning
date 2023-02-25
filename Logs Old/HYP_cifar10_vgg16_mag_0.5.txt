@@ -1,0 +1,50 @@
+Loading cifar10 dataset.
+Files already downloaded and verified
+Files already downloaded and verified
+Files already downloaded and verified
+Creating lottery-vgg16 model.
+Pre-Train for 0 epochs.
+Pruning with mag for 1 epochs.
+Post-Training for 10 epochs.
+Train results:
+                train_loss  test_loss  top1_accuracy  top5_accuracy
+Init.      0          NaN   2.417748          11.71          50.17
+Pre-Prune  0          NaN   2.417748          11.71          50.17
+Post-Prune 0          NaN   2.329497           8.82          49.55
+Final      10    0.532891   0.597118          79.43          98.59
+Prune results:
+             module   param  ...  score abs sum  prunable
+0    layers.0.conv  weight  ...     373.968018      True
+1    layers.0.conv    bias  ...       0.000000     False
+2    layers.1.conv  weight  ...    1730.575928      True
+3    layers.1.conv    bias  ...       0.000000     False
+4    layers.3.conv  weight  ...    3463.390137      True
+5    layers.3.conv    bias  ...       0.000000     False
+6    layers.4.conv  weight  ...    4910.584961      True
+7    layers.4.conv    bias  ...       0.000000     False
+8    layers.6.conv  weight  ...    9810.975586      True
+9    layers.6.conv    bias  ...       0.000000     False
+10   layers.7.conv  weight  ...   13856.869141      True
+11   layers.7.conv    bias  ...       0.000000     False
+12   layers.8.conv  weight  ...   13853.344727      True
+13   layers.8.conv    bias  ...       0.000000     False
+14  layers.10.conv  weight  ...   27728.505859      True
+15  layers.10.conv    bias  ...       0.000000     False
+16  layers.11.conv  weight  ...   39216.730469      True
+17  layers.11.conv    bias  ...       0.000000     False
+18  layers.12.conv  weight  ...   39200.449219      True
+19  layers.12.conv    bias  ...       0.000000     False
+20  layers.14.conv  weight  ...   39235.941406      True
+21  layers.14.conv    bias  ...       0.000000     False
+22  layers.15.conv  weight  ...   39234.457031      True
+23  layers.15.conv    bias  ...       0.000000     False
+24  layers.16.conv  weight  ...   39220.398438      True
+25  layers.16.conv    bias  ...       0.000000     False
+26              fc  weight  ...     250.940384      True
+27              fc    bias  ...       0.000000     False
+
+[28 rows x 13 columns]
+Parameter Sparsity: 4657711/14719818 (0.3164)
+FLOP Sparsity: 145383527/313478154 (0.4638)
+Inference time:  155.5433307539206
+Saving results.

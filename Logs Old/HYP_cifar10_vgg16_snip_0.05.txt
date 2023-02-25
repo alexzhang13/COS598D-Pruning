@@ -1,0 +1,8 @@
+Loading cifar10 dataset.
+Files already downloaded and verified
+Files already downloaded and verified
+Files already downloaded and verified
+Creating lottery-vgg16 model.
+Pre-Train for 0 epochs.
+Pruning with snip for 1 epochs.
+ERROR: 11887234.0 prunable parameters remaining, expected 13115278.045185937

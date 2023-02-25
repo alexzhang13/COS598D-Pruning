@@ -7,6 +7,7 @@ from Utils import generator
 from Utils import metrics
 from train import *
 from prune import *
+import timeit
 
 def run(args):
     ## Random Seed and Device ##
@@ -46,6 +47,7 @@ def run(args):
 
     
     ## Post-Train ##
+    
     print('Post-Training for {} epochs.'.format(args.post_epochs))
     post_result = train_eval_loop(model, loss, optimizer, scheduler, train_loader, 
                                   test_loader, device, args.post_epochs, args.verbose) 
