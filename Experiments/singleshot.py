@@ -26,6 +26,7 @@ def run(args):
     model = load.model(args.model, args.model_class)(input_shape, 
                                                      num_classes, 
                                                      args.dense_classifier, 
+                                                     args.butterfly_classifier, 
                                                      args.pretrained).to(device)
     loss = nn.CrossEntropyLoss()
     opt_class, opt_kwargs = load.optimizer(args.optimizer)

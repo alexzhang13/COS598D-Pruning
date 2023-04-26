@@ -27,6 +27,8 @@ if __name__ == '__main__':
                         help='model class (default: default)')
     training_args.add_argument('--dense-classifier', type=bool, default=False,
                         help='ensure last layer of model is dense (default: False)')
+    training_args.add_argument('--butterfly-classifier', type=bool, default=False,
+                    help='ensure last layer of model is  butterfly (default: False)')
     training_args.add_argument('--pretrained', type=bool, default=False,
                         help='load pretrained weights (default: False)')
     training_args.add_argument('--optimizer', type=str, default='adam', choices=['sgd','momentum','adam','rms'],

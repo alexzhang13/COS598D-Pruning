@@ -3,11 +3,14 @@ import torch.nn as nn
 import numpy as np
 import pandas as pd
 from prune import * 
-from Layers import layers
+from Layers import layers, butterfly
 
 def summary(model, scores, flops, prunable):
     r"""Summary of compression results for a model.
     """
+    
+    print(flops)
+    
     rows = []
     for name, module in model.named_modules():
         for pname, param in module.named_parameters(recurse=False):
@@ -19,6 +22,9 @@ def summary(model, scores, flops, prunable):
                 sparsity = 1.0
                 score = np.zeros(1)
             shape = param.detach().cpu().numpy().shape
+            print(name, pname)
+            print('flops', flops[name])
+            
             flop = flops[name][pname]
             score_mean = score.mean()
             score_var = score.var()
@@ -41,6 +47,12 @@ def flop(model, input_shape, device):
     def count_flops(name):
         def hook(module, input, output):
             flops = {}
+            if isinstance(module, butterfly.Butterfly):
+                in_features = module.in_size
+                out_features = module.out_size
+                flops['twiddle'] = in_features * out_features
+                if module.bias is not None:
+                    flops['bias'] = out_features
             if isinstance(module, layers.Linear) or isinstance(module, nn.Linear):
                 in_features = module.in_features
                 out_features = module.out_features

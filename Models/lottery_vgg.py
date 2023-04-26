@@ -5,6 +5,7 @@
 # This source code is licensed under the MIT license found in the
 # LICENSE file in the root directory of this source tree.
 
+import torch
 import torch.nn as nn
 import torch.nn.functional as F
 from Layers import layers
@@ -33,7 +34,7 @@ class ConvBNModule(nn.Module):
 class VGG(nn.Module):
     """A VGG-style neural network designed for CIFAR-10."""
 
-    def __init__(self, plan, conv, num_classes=10, dense_classifier=False):
+    def __init__(self, plan, conv, num_classes=10, dense_classifier=False, ):
         super(VGG, self).__init__()
         layer_list = []
         filters = 3

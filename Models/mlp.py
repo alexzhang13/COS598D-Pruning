@@ -3,9 +3,12 @@ import torch.nn as nn
 import numpy as np
 from Layers import layers
 from torch.nn import functional as F
+from Layers.butterfly import Butterfly
 
-
-def fc(input_shape, num_classes, dense_classifier=False, pretrained=False, L=6, N=100, nonlinearity=nn.ReLU()):
+def fc(input_shape, num_classes, dense_classifier=False, 
+       butterfly_classifier=False,
+       pretrained=False, L=6, N=100, nonlinearity=nn.ReLU(),
+       butterfly_layers=[]):
   size = np.prod(input_shape)
   
   # Linear feature extractor
@@ -13,12 +16,17 @@ def fc(input_shape, num_classes, dense_classifier=False, pretrained=False, L=6, 
   modules.append(layers.Linear(size, N))
   modules.append(nonlinearity)
   for i in range(L-2):
-    modules.append(layers.Linear(N,N))
+    if i in butterfly_layers:
+      modules.append(Butterfly(N,N))
+    else:
+      modules.append(layers.Linear(N,N))
     modules.append(nonlinearity)
 
   # Linear classifier
   if dense_classifier:
     modules.append(nn.Linear(N, num_classes))
+  elif butterfly_classifier:
+    modules.append(Butterfly(N, num_classes))
   else:
     modules.append(layers.Linear(N, num_classes))
   model = nn.Sequential(*modules)
@@ -30,7 +38,9 @@ def fc(input_shape, num_classes, dense_classifier=False, pretrained=False, L=6, 
   return model
 
 
-def conv(input_shape, num_classes, dense_classifier=False, pretrained=False, L=3, N=32, nonlinearity=nn.ReLU()): 
+def conv(input_shape, num_classes, dense_classifier=False, 
+         butterfly_classifier=False,
+         pretrained=False, L=3, N=32, nonlinearity=nn.ReLU(),): 
   channels, width, height = input_shape
   
   # Convolutional feature extractor
@@ -45,6 +55,8 @@ def conv(input_shape, num_classes, dense_classifier=False, pretrained=False, L=3
   modules.append(nn.Flatten())
   if dense_classifier:
     modules.append(nn.Linear(N * width * height, num_classes))
+  elif butterfly_classifier:
+    modules.append(Butterfly(N * width * height, num_classes))
   else:
     modules.append(layers.Linear(N * width * height, num_classes))
   model = nn.Sequential(*modules)

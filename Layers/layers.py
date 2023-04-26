@@ -6,6 +6,29 @@ from torch.nn import init
 from torch.nn.parameter import Parameter
 from torch.nn.modules.utils import _pair
 
+from Layers import butterfly
+
+class Butterfly(butterfly.Butterfly):
+    """Product of log N butterfly factors, each is a block 2x2 of diagonal matrices.
+    Compatible with torch.nn.Linear.
+    """
+
+    def __init__(self, in_size, out_size, bias=True, complex=False,
+                 increasing_stride=True, init='randn', nblocks=1):
+        super().__init__(in_size, out_size, bias=bias, complex=complex,
+                 increasing_stride=increasing_stride, init=init, nblocks=nblocks)
+        
+        self.register_buffer('weight_mask', torch.ones(self.weight.shape))
+        if self.bias is not None:
+            self.register_buffer('bias_mask', torch.ones(self.bias.shape))
+        
+    def forward(self, input, transpose=False, conjugate=False, subtwiddle=False):
+        W = self.weight_mask * self.weight
+        if self.bias is not None:
+            b = self.bias_mask * self.bias
+        else:
+            b = self.bias
+        return F.linear(input, W, b)
 
 class Linear(nn.Linear):
     def __init__(self, in_features, out_features, bias=True):

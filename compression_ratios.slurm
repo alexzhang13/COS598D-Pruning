@@ -29,8 +29,8 @@ mkdir ${OUT_DIRECTORY};
 # Submit jobs.
 for dataset in "cifar10"; do
     for model in "vgg16"; do
-        for pruner in "rand" "mag" "snip" "grasp" "synflow"; do
-            for cp in 0.05 0.1 0.2 0.5 1 2; do
+        for pruner in "grasp"; do # "rand" "mag" "snip" "grasp" "synflow"; do
+            for cp in 0.05; do #0.1 0.2 0.5 1 2; do
                 if [${pruner} == "mag"]
                 then 
                     srun python main.py --pre-epochs 200 --post-epoch 100 --verbose --expid HYP_${dataset}_${model}_${pruner}_${cp} --model-class lottery --model ${model} --dataset ${dataset} --experiment singleshot --pruner ${pruner} --compression ${cp} > Logs/HYP_${dataset}_${model}_${pruner}_${cp}.txt
