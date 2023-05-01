@@ -9,13 +9,18 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 from Layers import layers
+from Layers.butterfly import Butterfly
+from Layers.kops import KOP2d
 
 class ConvModule(nn.Module):
     """A single convolutional module in a VGG network."""
 
-    def __init__(self, in_filters, out_filters):
+    def __init__(self, in_filters, out_filters, butterfly_layers, input_shape):
         super(ConvModule, self).__init__()
-        self.conv = layers.Conv2d(in_filters, out_filters, kernel_size=3, padding=1)
+        if butterfly_layers:
+            self.conv = KOP2d(in_size=input_shape, in_ch=in_filters, out_ch=out_filters, kernel_size=3)
+        else:
+            self.conv = layers.Conv2d(in_filters, out_filters, kernel_size=3, padding=1)
 
     def forward(self, x):
         return F.relu(self.conv(x))
@@ -23,9 +28,13 @@ class ConvModule(nn.Module):
 class ConvBNModule(nn.Module):
     """A single convolutional module in a VGG network."""
 
-    def __init__(self, in_filters, out_filters):
+    def __init__(self, in_filters, out_filters, butterfly_layers, input_shape):
         super(ConvBNModule, self).__init__()
-        self.conv = layers.Conv2d(in_filters, out_filters, kernel_size=3, padding=1)
+        if butterfly_layers:
+            self.conv = KOP2d(in_size=input_shape, in_ch=in_filters, out_ch=out_filters, kernel_size=3)
+        else:
+            self.conv = layers.Conv2d(in_filters, out_filters, kernel_size=3, padding=1)
+            
         self.bn = layers.BatchNorm2d(out_filters)
 
     def forward(self, x):
@@ -34,7 +43,7 @@ class ConvBNModule(nn.Module):
 class VGG(nn.Module):
     """A VGG-style neural network designed for CIFAR-10."""
 
-    def __init__(self, plan, conv, num_classes=10, dense_classifier=False, ):
+    def __init__(self, plan, conv, num_classes=10, dense_classifier=False, butterfly_classifier=False, butterfly_layers=False, input_shape=None):
         super(VGG, self).__init__()
         layer_list = []
         filters = 3
@@ -43,14 +52,21 @@ class VGG(nn.Module):
             if spec == 'M':
                 layer_list.append(nn.MaxPool2d(kernel_size=2, stride=2))
             else:
-                layer_list.append(conv(filters, spec))
+                if butterfly_layers:
+                    layer_list.append(conv(filters, spec, butterfly_layers, input_shape))
+                else:
+                    layer_list.append(conv(filters, spec, butterfly_layers, input_shape))
                 filters = spec
 
-        self.layers = nn.Sequential(*layer_list)        
+        self.layers = nn.Sequential(*layer_list)  
+        
+        print('input shape', input_shape, self.layers)
 
         self.fc = layers.Linear(512, num_classes)
         if dense_classifier:
             self.fc = nn.Linear(512, num_classes)
+        elif butterfly_classifier:
+            self.fc = Butterfly(512, num_classes)
 
         self._initialize_weights()
 
@@ -84,8 +100,8 @@ def _plan(num):
         raise ValueError('Unknown VGG model: {}'.format(num))
     return plan
 
-def _vgg(arch, plan, conv, num_classes, dense_classifier, pretrained):
-    model = VGG(plan, conv, num_classes, dense_classifier)
+def _vgg(arch, plan, conv, num_classes, dense_classifier, butterfly_classifier, butterfly_layers, pretrained, input_shape):
+    model = VGG(plan, conv, num_classes, dense_classifier, butterfly_classifier, butterfly_layers, input_shape)
     if pretrained:
         pretrained_path = 'Models/pretrained/{}-lottery.pt'.format(arch)
         pretrained_dict = torch.load(pretrained_path)
@@ -94,34 +110,34 @@ def _vgg(arch, plan, conv, num_classes, dense_classifier, pretrained):
         model.load_state_dict(model_dict)
     return model
 
-def vgg11(input_shape, num_classes, dense_classifier=False, pretrained=False):
+def vgg11(input_shape, num_classes, dense_classifier=False, butterfly_classifier=False, butterfly_layers=False, pretrained=False):
     plan = _plan(11)
-    return _vgg('vgg11_bn', plan, ConvModule, num_classes, dense_classifier, pretrained)
+    return _vgg('vgg11_bn', plan, ConvModule, num_classes, dense_classifier, butterfly_classifier, butterfly_layers, pretrained, input_shape)
 
-def vgg11_bn(input_shape, num_classes, dense_classifier=False, pretrained=False):
+def vgg11_bn(input_shape, num_classes, dense_classifier=False, butterfly_classifier=False, butterfly_layers=False, pretrained=False):
     plan = _plan(11)
-    return _vgg('vgg11_bn', plan, ConvBNModule, num_classes, dense_classifier, pretrained)
+    return _vgg('vgg11_bn', plan, ConvBNModule, num_classes, dense_classifier, butterfly_classifier, butterfly_layers, pretrained, input_shape)
 
-def vgg13(input_shape, num_classes, dense_classifier=False, pretrained=False):
+def vgg13(input_shape, num_classes, dense_classifier=False, butterfly_classifier=False, butterfly_layers=False, pretrained=False):
     plan = _plan(13)
-    return _vgg('vgg13_bn', plan, ConvModule, num_classes, dense_classifier, pretrained)
+    return _vgg('vgg13_bn', plan, ConvModule, num_classes, dense_classifier, butterfly_classifier, butterfly_layers, pretrained, input_shape)
 
-def vgg13_bn(input_shape, num_classes, dense_classifier=False, pretrained=False):
+def vgg13_bn(input_shape, num_classes, dense_classifier=False, butterfly_classifier=False, butterfly_layers=False, pretrained=False):
     plan = _plan(13)
-    return _vgg('vgg13_bn', plan, ConvBNModule, num_classes, dense_classifier, pretrained)
+    return _vgg('vgg13_bn', plan, ConvBNModule, num_classes, dense_classifier, butterfly_classifier, butterfly_layers, pretrained, input_shape)
 
-def vgg16(input_shape, num_classes, dense_classifier=False, pretrained=False):
+def vgg16(input_shape, num_classes, dense_classifier=False, butterfly_classifier=False, butterfly_layers=False, pretrained=False):
     plan = _plan(16)
-    return _vgg('vgg16_bn', plan, ConvModule, num_classes, dense_classifier, pretrained)
+    return _vgg('vgg16_bn', plan, ConvModule, num_classes, dense_classifier, butterfly_classifier, butterfly_layers, pretrained, input_shape)
 
-def vgg16_bn(input_shape, num_classes, dense_classifier=False, pretrained=False):
+def vgg16_bn(input_shape, num_classes, dense_classifier=False, butterfly_classifier=False, butterfly_layers=False, pretrained=False):
     plan = _plan(16)
-    return _vgg('vgg16_bn', plan, ConvBNModule, num_classes, dense_classifier, pretrained)
+    return _vgg('vgg16_bn', plan, ConvBNModule, num_classes, dense_classifier, butterfly_classifier, butterfly_layers, pretrained, input_shape)
 
-def vgg19(input_shape, num_classes, dense_classifier=False, pretrained=False):
+def vgg19(input_shape, num_classes, dense_classifier=False, butterfly_classifier=False, butterfly_layers=False, pretrained=False):
     plan = _plan(19)
-    return _vgg('vgg19_bn', plan, ConvModule, num_classes, dense_classifier, pretrained)
+    return _vgg('vgg19_bn', plan, ConvModule, num_classes, dense_classifier, butterfly_classifier, butterfly_layers, pretrained, input_shape)
 
-def vgg19_bn(input_shape, num_classes, dense_classifier=False, pretrained=False):
+def vgg19_bn(input_shape, num_classes, dense_classifier=False, butterfly_classifier=False, butterfly_layers=False, pretrained=False):
     plan = _plan(19)
-    return _vgg('vgg19_bn', plan, ConvBNModule, num_classes, dense_classifier, pretrained)
+    return _vgg('vgg19_bn', plan, ConvBNModule, num_classes, dense_classifier, butterfly_classifier, butterfly_layers, pretrained, input_shape)

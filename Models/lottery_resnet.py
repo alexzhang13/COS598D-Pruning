@@ -5,9 +5,11 @@
 # This source code is licensed under the MIT license found in the
 # LICENSE file in the root directory of this source tree.
 
+import torch
 import torch.nn as nn
 import torch.nn.functional as F
 from Layers import layers
+from Layers.butterfly import Butterfly
 
 
 class Block(nn.Module):
@@ -41,7 +43,7 @@ class Block(nn.Module):
 class ResNet(nn.Module):
     """A residual neural network as originally designed for CIFAR-10."""
     
-    def __init__(self, plan, num_classes, dense_classifier):
+    def __init__(self, plan, num_classes, dense_classifier, butterfly_classifier=False):
         super(ResNet, self).__init__()
 
         # Initial convolution.
@@ -62,6 +64,8 @@ class ResNet(nn.Module):
         self.fc = layers.Linear(plan[-1][0], num_classes)
         if dense_classifier:
             self.fc = nn.Linear(plan[-1][0], num_classes)
+        elif butterfly_classifier:
+            self.fc = Butterfly(plan[-1][0], num_classes)
 
         self._initialize_weights()
 
@@ -110,8 +114,8 @@ def _plan(D, W):
 
     return plan
 
-def _resnet(arch, plan, num_classes, dense_classifier, pretrained):
-    model = ResNet(plan, num_classes, dense_classifier)
+def _resnet(arch, plan, num_classes, dense_classifier, butterfly_classifier, pretrained):
+    model = ResNet(plan, num_classes, dense_classifier, butterfly_classifier)
     if pretrained:
         pretrained_path = 'Models/pretrained/{}-lottery.pt'.format(arch)
         pretrained_dict = torch.load(pretrained_path)
@@ -122,51 +126,51 @@ def _resnet(arch, plan, num_classes, dense_classifier, pretrained):
 
 
 # ResNet Models
-def resnet20(input_shape, num_classes, dense_classifier=False, pretrained=False):
+def resnet20(input_shape, num_classes, dense_classifier=False, butterfly_classifier=False, pretrained=False):
     plan = _plan(20, 16)
-    return _resnet('resnet20', plan, num_classes, dense_classifier, pretrained)
+    return _resnet('resnet20', plan, num_classes, dense_classifier, butterfly_classifier, pretrained)
 
-def resnet32(input_shape, num_classes, dense_classifier=False, pretrained=False):
+def resnet32(input_shape, num_classes, dense_classifier=False, butterfly_classifier=False, pretrained=False):
     plan = _plan(32, 16)
-    return _resnet('resnet32', plan, num_classes, dense_classifier, pretrained)
+    return _resnet('resnet32', plan, num_classes, dense_classifier, butterfly_classifier, pretrained)
 
-def resnet44(input_shape, num_classes, dense_classifier=False, pretrained=False):
+def resnet44(input_shape, num_classes, dense_classifier=False, butterfly_classifier=False, pretrained=False):
     plan = _plan(44, 16)
-    return _resnet('resnet44', plan, num_classes, dense_classifier, pretrained)
+    return _resnet('resnet44', plan, num_classes, dense_classifier, butterfly_classifier, pretrained)
 
-def resnet56(input_shape, num_classes, dense_classifier=False, pretrained=False):
+def resnet56(input_shape, num_classes, dense_classifier=False, butterfly_classifier=False, pretrained=False):
     plan = _plan(56, 16)
-    return _resnet('resnet56', plan, num_classes, dense_classifier, pretrained)
+    return _resnet('resnet56', plan, num_classes, dense_classifier, butterfly_classifier, pretrained)
 
-def resnet110(input_shape, num_classes, dense_classifier=False, pretrained=False):
+def resnet110(input_shape, num_classes, dense_classifier=False, butterfly_classifier=False, pretrained=False):
     plan = _plan(110, 16)
-    return _resnet('resnet110', plan, num_classes, dense_classifier, pretrained)
+    return _resnet('resnet110', plan, num_classes, dense_classifier, butterfly_classifier, pretrained)
 
-def resnet1202(input_shape, num_classes, dense_classifier=False, pretrained=False):
+def resnet1202(input_shape, num_classes, dense_classifier=False, butterfly_classifier=False, pretrained=False):
     plan = _plan(1202, 16)
-    return _resnet('resnet1202', plan, num_classes, dense_classifier, pretrained)
+    return _resnet('resnet1202', plan, num_classes, dense_classifier, butterfly_classifier, pretrained)
 
 # Wide ResNet Models
-def wide_resnet20(input_shape, num_classes, dense_classifier=False, pretrained=False):
+def wide_resnet20(input_shape, num_classes, dense_classifier=False, butterfly_classifier=False, pretrained=False):
     plan = _plan(20, 32)
-    return _resnet('wide_resnet20', plan, num_classes, dense_classifier, pretrained)
+    return _resnet('wide_resnet20', plan, num_classes, dense_classifier, butterfly_classifier, pretrained)
 
-def wide_resnet32(input_shape, num_classes, dense_classifier=False, pretrained=False):
+def wide_resnet32(input_shape, num_classes, dense_classifier=False, butterfly_classifier=False, pretrained=False):
     plan = _plan(32, 32)
-    return _resnet('wide_resnet32', plan, num_classes, dense_classifier, pretrained)
+    return _resnet('wide_resnet32', plan, num_classes, dense_classifier, butterfly_classifier, pretrained)
 
-def wide_resnet44(input_shape, num_classes, dense_classifier=False, pretrained=False):
+def wide_resnet44(input_shape, num_classes, dense_classifier=False, butterfly_classifier=False, pretrained=False):
     plan = _plan(44, 32)
-    return _resnet('wide_resnet44', plan, num_classes, dense_classifier, pretrained)
+    return _resnet('wide_resnet44', plan, num_classes, dense_classifier, butterfly_classifier, pretrained)
 
-def wide_resnet56(input_shape, num_classes, dense_classifier=False, pretrained=False):
+def wide_resnet56(input_shape, num_classes, dense_classifier=False, butterfly_classifier=False, pretrained=False):
     plan = _plan(56, 32)
-    return _resnet('wide_resnet56', plan, num_classes, dense_classifier, pretrained)
+    return _resnet('wide_resnet56', plan, num_classes, dense_classifier, butterfly_classifier, pretrained)
 
-def wide_resnet110(input_shape, num_classes, dense_classifier=False, pretrained=False):
+def wide_resnet110(input_shape, num_classes, dense_classifier=False, butterfly_classifier=False, pretrained=False):
     plan = _plan(110, 32)
-    return _resnet('wide_resnet110', plan, num_classes, dense_classifier, pretrained)
+    return _resnet('wide_resnet110', plan, num_classes, dense_classifier, butterfly_classifier, pretrained)
 
-def wide_resnet1202(input_shape, num_classes, dense_classifier=False, pretrained=False):
+def wide_resnet1202(input_shape, num_classes, dense_classifier=False, butterfly_classifier=False, pretrained=False):
     plan = _plan(1202, 32)
-    return _resnet('wide_resnet1202', plan, num_classes, dense_classifier, pretrained)
+    return _resnet('wide_resnet1202', plan, num_classes, dense_classifier, butterfly_classifier, pretrained)

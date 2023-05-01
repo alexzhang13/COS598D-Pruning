@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 # Remove one # to uncommment
 #SBATCH --output=./Logs/%x-%j.out
@@ -8,7 +8,7 @@
 #SBATCH -n 1 #tasks
 #SBATCH --cpus-per-task=1
 #SBATCH --mem=32G
-#SBATCH --time=1-00:00:00    # Run for 4 hours
+#SBATCH --time=1-00:00:00    # Run for 1 day
 #SBATCH --gres=gpu:1
 
 # on average one GPU takes 5 cpu and 20GB memory
@@ -27,18 +27,18 @@ OUT_DIRECTORY='./Logs/'${tag}
 mkdir ${OUT_DIRECTORY};
 
 # Submit jobs.
-for dataset in "cifar10"; do
-    for model in "vgg16"; do
+for dataset in "mnist"; do # for dataset in "cifar10"; do
+    for model in "fc"; do # for model in "vgg16"; do
         for pruner in "rand" "mag" "snip" "grasp" "synflow" "butterfly"; do
-            for cp in 0.1 0.2 0.5 1 2; do
+            for cp in 1; do #0.1 0.2 0.5 1 2; do
                 if [ "$pruner" == "mag" ]
                 then 
                     srun python main.py \
-                    --pre-epochs 200 \
-                    --post-epoch 100 \
+                    --pre-epochs 20 \
+                    --post-epoch 10 \
                     --verbose \
                     --expid HYP_${dataset}_${model}_${pruner}_${cp} \
-                    --model-class lottery \
+                    --model-class default \
                     --model ${model} \
                     --dataset ${dataset} \
                     --experiment singleshot \
@@ -49,10 +49,10 @@ for dataset in "cifar10"; do
                 elif [ "$pruner" == "butterfly" ]
                 then
                     srun python main.py \
-                    --post-epoch 100 \
+                    --post-epoch 10 \
                     --verbose \
                     --expid HYP_${dataset}_${model}_${pruner}_${cp} \
-                    --model-class lottery \
+                    --model-class default \
                     --model ${model} \
                     --dataset ${dataset} \
                     --experiment singleshot \
@@ -63,10 +63,10 @@ for dataset in "cifar10"; do
                     > Logs/ButterHead/HYP_${dataset}_${model}_${pruner}_${cp}.txt
                 else
                     srun python main.py \
-                    --post-epoch 100 \
+                    --post-epoch 10 \
                     --verbose \
                     --expid HYP_${dataset}_${model}_${pruner}_${cp} \
-                    --model-class lottery \
+                    --model-class default \
                     --model ${model} \
                     --dataset ${dataset} \
                     --experiment singleshot \

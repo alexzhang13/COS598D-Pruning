@@ -6,9 +6,9 @@ from torch.nn import functional as F
 from Layers.butterfly import Butterfly
 
 def fc(input_shape, num_classes, dense_classifier=False, 
-       butterfly_classifier=False,
+       butterfly_classifier=False, butterfly_layers=False,
        pretrained=False, L=6, N=100, nonlinearity=nn.ReLU(),
-       butterfly_layers=[]):
+       ):
   size = np.prod(input_shape)
   
   # Linear feature extractor
@@ -16,7 +16,7 @@ def fc(input_shape, num_classes, dense_classifier=False,
   modules.append(layers.Linear(size, N))
   modules.append(nonlinearity)
   for i in range(L-2):
-    if i in butterfly_layers:
+    if butterfly_layers:
       modules.append(Butterfly(N,N))
     else:
       modules.append(layers.Linear(N,N))
