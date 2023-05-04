@@ -12,9 +12,13 @@ import timeit
 def run(args):
     ## Random Seed and Device ##
     torch.manual_seed(args.seed)
+    if torch.cuda.is_available():
+        print('CUDA is available')
+        device = torch.device('cuda:0')
     device = load.device(args.gpu)
 
     ## Data ##
+    print('Device:', device)
     print('Loading {} dataset.'.format(args.dataset))
     input_shape, num_classes = load.dimension(args.dataset) 
     prune_loader = load.dataloader(args.dataset, args.prune_batch_size, True, args.workers, args.prune_dataset_ratio * num_classes)
