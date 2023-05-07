@@ -9,6 +9,9 @@ from train import *
 from prune import *
 import timeit
 
+def count_parameters(model):
+    return sum(p.numel() for p in model.parameters() if p.requires_grad)
+
 def run(args):
     ## Random Seed and Device ##
     torch.manual_seed(args.seed)
@@ -33,6 +36,8 @@ def run(args):
                                                      args.butterfly_classifier,
                                                      args.butterfly_layers, 
                                                      args.pretrained).to(device)
+    
+    print('# parameters', count_parameters(model))
     loss = nn.CrossEntropyLoss()
     opt_class, opt_kwargs = load.optimizer(args.optimizer)
     optimizer = opt_class(generator.parameters(model), lr=args.lr, weight_decay=args.weight_decay, **opt_kwargs)
@@ -45,10 +50,11 @@ def run(args):
                                  test_loader, device, args.pre_epochs, args.verbose)
 
     ## Prune ##
-    print('Pruning with {} for {} epochs.'.format(args.pruner, args.prune_epochs))
-    pruner = load.pruner(args.pruner)(generator.masked_parameters(model, args.prune_bias, args.prune_batchnorm, args.prune_residual))
-    sparsity = 10**(-float(args.compression))
-    prune_loop(model, loss, pruner, prune_loader, device, sparsity, 
+    if args.pruner != 'noprune':
+        print('Pruning with {} for {} epochs.'.format(args.pruner, args.prune_epochs))
+        pruner = load.pruner(args.pruner)(generator.masked_parameters(model, args.prune_bias, args.prune_batchnorm, args.prune_residual))
+        sparsity = 10**(-float(args.compression))
+        prune_loop(model, loss, pruner, prune_loader, device, sparsity, 
                args.compression_schedule, args.mask_scope, args.prune_epochs, args.reinitialize, args.prune_train_mode, args.shuffle, args.invert)
 
     

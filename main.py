@@ -55,7 +55,7 @@ if __name__ == '__main__':
     # Pruning Hyperparameters
     pruning_args = parser.add_argument_group('pruning')
     pruning_args.add_argument('--pruner', type=str, default='rand', 
-                        choices=['rand','mag','snip','grasp','synflow'],
+                        choices=['none', 'rand','mag','snip','grasp','synflow'],
                         help='prune strategy (default: rand)')
     pruning_args.add_argument('--compression', type=float, default=0.0,
                         help='quotient of prunable non-zero prunable parameters before and after pruning (default: 1.0)')

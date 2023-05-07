@@ -37,21 +37,20 @@ for dataset in "cifar10"; do
                     --pre-epochs 200 \
                     --post-epochs 50 \
                     --verbose \
-                    --expid HYP_${dataset}_${model}_${pruner}_${cp} \
+                    --expid NoBut_HYP_${dataset}_${model}_${pruner}_${cp} \
                     --model-class lottery \
                     --model ${model} \
                     --dataset ${dataset} \
                     --experiment singleshot \
                     --pruner ${pruner} \
                     --compression ${cp} \
-                    --butterfly-classifier true \
-                    > Logs/ButterHead/HYP_${dataset}_${model}_${pruner}_${cp}.txt
+                    > Logs/NoButterfly/HYP_${dataset}_${model}_${pruner}_${cp}.txt
                 elif [ "$pruner" == "butterfly" ]
                 then
                     srun python main.py \
                     --verbose \
                     --post-epochs 50 \
-                    --expid HYP_${dataset}_${model}_${pruner}_${cp} \
+                    --expid NoBut_HYP_${dataset}_${model}_${pruner}_${cp} \
                     --model-class lottery \
                     --model ${model} \
                     --dataset ${dataset} \
@@ -59,21 +58,19 @@ for dataset in "cifar10"; do
                     --pruner snip \
                     --compression 0 \
                     --butterfly-layers true \
-                    --butterfly-classifier true \
-                    > Logs/ButterHead/HYP_${dataset}_${model}_${pruner}_${cp}.txt
+                    > Logs/NoButterfly/HYP_${dataset}_${model}_${pruner}_${cp}.txt
                 else
                     srun python main.py \
                     --verbose \
                     --post-epochs 50 \
-                    --expid HYP_${dataset}_${model}_${pruner}_${cp} \
+                    --expid NoBut_HYP_${dataset}_${model}_${pruner}_${cp} \
                     --model-class lottery \
                     --model ${model} \
                     --dataset ${dataset} \
                     --experiment singleshot \
                     --pruner ${pruner} \
                     --compression ${cp} \
-                    --butterfly-classifier true \
-                    > Logs/ButterHead/HYP_${dataset}_${model}_${pruner}_${cp}.txt
+                    > Logs/NoButterfly/HYP_${dataset}_${model}_${pruner}_${cp}.txt
                 fi;
             done;
         done;
